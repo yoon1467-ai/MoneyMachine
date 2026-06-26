@@ -1,40 +1,91 @@
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
+from app.ai.openai_client import ask_gpt
 
-load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
+SYSTEM_PROMPT = """
+당신은 대한민국 SEO 블로그 전문 작가입니다.
 
-if not api_key:
-    raise ValueError("OPENAI_API_KEY가 .env 파일에 없습니다.")
+목표:
+- 검색 유입을 받을 수 있는 고품질 블로그 글 작성
+- 애드센스 승인에 유리한 정보성 콘텐츠 작성
+- 사람이 직접 쓴 것처럼 자연스럽게 작성
+- 과장, 허위, 단정 표현 금지
+- 최신 정보가 필요한 내용은 '확인 필요'라는 뉘앙스를 자연스럽게 포함
 
-client = OpenAI(api_key=api_key)
+작성 규칙:
+- Markdown 형식으로 작성
+- 제목은 H1 하나만 사용
+- 본문은 H2, H3 구조로 작성
+- 최소 2500자 이상
+- 표 1개 이상 포함
+- FAQ 5개 이상 포함
+- 메타 설명 포함
+- 태그 포함
+- 내부링크 추천 포함
+- 이미지 프롬프트 포함
+- 마지막에는 실천 가능한 CTA 포함
+
+절대 하지 말 것:
+- '이 글에서는' 같은 AI스러운 표현 반복 금지
+- 의미 없는 일반론 반복 금지
+- 키워드 과다 반복 금지
+- 출처 없는 최신 정책 단정 금지
+"""
+
+
+def build_prompt(keyword):
+    return f"""
+주제: {keyword}
+
+아래 형식으로 블로그 글을 작성하세요.
+
+# 클릭률 높은 제목
+
+메타 설명:
+150자 내외로 검색 결과에 어울리는 설명 작성
+
+태그:
+쉼표로 구분한 태그 5~8개
+
+---
+
+## 도입부
+독자의 상황에 공감하면서 왜 이 글을 읽어야 하는지 설명
+
+## 핵심 요약
+- 핵심 내용 5개 bullet로 정리
+
+## 본문
+H2/H3 구조로 상세 작성
+실제 예시 포함
+표 포함
+
+## 주의할 점
+오해하기 쉬운 부분 정리
+
+## 함께 보면 좋은 글
+내부링크 추천 제목 3~5개 작성
+
+## 이미지 프롬프트
+대표 이미지용 프롬프트 1개
+본문 이미지용 프롬프트 2개
+
+## FAQ
+질문과 답변 5개 이상
+
+## 결론
+요약 + 지금 바로 할 수 있는 행동 제안
+
+조건:
+- 2500자 이상
+- Markdown 형식
+- 사람이 직접 작성한 자연스러운 문체
+- 너무 광고처럼 쓰지 말 것
+- 최신 정보가 필요한 경우 확인 필요 문장 포함
+"""
 
 
 def generate_article(keyword):
-    prompt = f"""
-당신은 SEO 전문 블로그 작가입니다.
-
-주제: {keyword}
-
-조건
-- 2000자 이상
-- Markdown 형식
-- 표 1개 포함
-- FAQ 5개 포함
-- 결론 포함
-- 사람이 쓴 것처럼 자연스럽게 작성
-"""
-
-    response = client.chat.completions.create(
-        model="gpt-5",
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
+    return ask_gpt(
+        prompt=build_prompt(keyword),
+        system_prompt=SYSTEM_PROMPT
     )
-
-    return response.choices[0].message.content

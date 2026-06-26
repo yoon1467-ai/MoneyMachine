@@ -1,0 +1,12 @@
+{
+  "app_name": "Money Machine Pro",
+  "version": "v4.5",
+  "openai_model": "gpt-5",
+  "article_save_dir": "articles",
+  "recommend_keyword_count": 10,
+  "keyword_candidate_limit": 80,
+  "article_min_length": 2500,
+  "auto_exclude_years": ["2024", "2025"],
+  "blogger_blog_id": "2180179162305691104",
+  "blogger_credentials_file": "config/blogger_credentials.json"
+}

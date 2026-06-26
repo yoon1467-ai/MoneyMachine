@@ -1,0 +1,12 @@
+.env
+config/blogger_credentials.json
+config/blogger_token.json
+
+__pycache__/
+*.pyc
+
+articles/
+logs/
+data/
+exports/
+app/ai/.env
